@@ -1,0 +1,24 @@
+{
+  "name": "rocket-team-racing-micro",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "vite": "^5.1.0",
+    "vite-plugin-singlefile": "^2.0.0"
+  },
+  "dependencies": {
+    "@hashgraph/hedera-wallet-connect": "^1.0.6",
+    "@hashgraph/sdk": "^2.41.0",
+    "@wagmi/connectors": "^4.1.14",
+    "@wagmi/core": "^2.6.5",
+    "@web3modal/wagmi": "^4.0.5",
+    "viem": "^2.7.10"
+  }
+}
