@@ -7,19 +7,43 @@ import {
   transactionBodyToBase64String,
   transactionToTransactionBody,
 } from "@hashgraph/hedera-wallet-connect";
-import { AccountId, Hbar, LedgerId, TransferTransaction } from "@hashgraph/sdk";
+
+import {
+  AccountId,
+  Hbar,
+  LedgerId,
+  TransactionId,
+  TransferTransaction,
+} from "@hashgraph/sdk";
 
 import { SignClientTypes } from "@walletconnect/types";
 
 var dAppConnector: DAppConnector | undefined;
 
-async function init(e: Event) {
-  const projectId = getState("project-id");
+const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
+const metadataName = import.meta.env.VITE_WALLET_CONNECT_METADATA_NAME;
+const metadataDescription = import.meta.env
+  .VITE_WALLET_CONNECT_METADATA_DESCRIPTION;
+const metadataUrl = import.meta.env.VITE_WALLET_CONNECT_METADATA_URL;
+const metadataIconUrl = import.meta.env.VITE_WALLET_CONNECT_METADATA_ICON_URL;
+
+function saveState(e: SubmitEvent) {
+  const formData = new FormData(e.target as HTMLFormElement);
+  for (const [key, value] of formData) {
+    localStorage.setItem(key, value as string);
+  }
+}
+
+function getState(key: string) {
+  return localStorage.getItem(key) || "";
+}
+
+export async function init() {
   const metadata: SignClientTypes.Metadata = {
-    name: getState("name"),
-    description: getState("description"),
-    url: getState("url"),
-    icons: [getState("icons")],
+    name: metadataName,
+    description: metadataDescription,
+    url: metadataUrl,
+    icons: [metadataIconUrl],
   };
 
   dAppConnector = new DAppConnector(
@@ -33,34 +57,49 @@ async function init(e: Event) {
 
   await dAppConnector.init({ logger: "error" });
 
-  const eventTarget = e.target as HTMLElement;
-  eventTarget
-    .querySelectorAll("input,button")
-    .forEach((input) => ((input as HTMLInputElement).disabled = true));
-  document
-    .querySelectorAll(".toggle input,.toggle button, .toggle select")
-    .forEach((element) => ((element as HTMLInputElement).disabled = false));
-
-  return "dApp: WalletConnect initialized!";
+  console.log("Initialized dAppConnector!");
 }
 
 export async function hedera_signTransaction(_: Event) {
+  if (!dAppConnector) {
+    throw new Error("dAppConnector not initialized!");
+  }
+
   const transaction = new TransferTransaction()
-    .setTransactionId(TransactionId.generate(getState("sign-from")))
-    .setMaxTransactionFee(new Hbar(1))
-    .addHbarTransfer(getState("sign-from"), new Hbar(-getState("sign-amount")))
-    .addHbarTransfer(getState("sign-to"), new Hbar(+getState("sign-amount")));
+    .setTransactionId(TransactionId.generate("0.0.3571648"))
+    .setMaxTransactionFee(new Hbar(10))
+    .addHbarTransfer("0.0.3571648", new Hbar(-10))
+    .addHbarTransfer("0.0.3571649", new Hbar(10));
 
   const params: SignTransactionParams = {
-    signerAccountId: "hedera:testnet:" + getState("sign-from"),
+    signerAccountId: "hedera:testnet:0.0.3571648",
     transactionBody: transactionBodyToBase64String(
       // must specify a node account id for the transaction body
-      transactionToTransactionBody(transaction, AccountId.fromString("0.0.3"))
+      transactionToTransactionBody(transaction, AccountId.fromString("0.0.16"))
     ),
   };
 
-  const { signatureMap } = await dAppConnector!.signTransaction(params);
-  document.getElementById("sign-transaction-result")!.innerText =
-    JSON.stringify({ params, signatureMap }, null, 2);
+  const { signatureMap } = await dAppConnector.signTransaction(params);
+
   console.log({ params, signatureMap });
 }
+
+// connect a new pairing string to a wallet via the WalletConnect modal
+async function connect(e: Event) {
+  e.preventDefault();
+  await dAppConnector!.openModal();
+
+  console.log("Connected to wallet!");
+}
+
+// disconnect
+async function disconnect(e: Event) {
+  e.preventDefault();
+  await dAppConnector!.disconnectAll();
+
+  console.log("Disconnected from wallet!");
+}
+
+document.getElementById("connect")!.onclick = connect;
+document.getElementById("disconnect")!.onclick = disconnect;
+document.getElementById("sign-transaction")!.onclick = hedera_signTransaction;

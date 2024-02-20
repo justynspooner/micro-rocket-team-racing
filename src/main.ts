@@ -1,10 +1,10 @@
 import Game from "./game/index.ts";
+import { init } from "./lib/hashgraph.ts";
+
 import "./style.css";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
-  <button id="btn">Connect</button>
-  <span id="user"></span>
     <h1>Micro Rocket Team Racing</h1>
     <p class="read-the-docs">
       Connect to log your lap times and see the leaderboard.
@@ -14,5 +14,6 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 `;
 
 document.addEventListener("DOMContentLoaded", () => {
+  init();
   new Game().start();
 });

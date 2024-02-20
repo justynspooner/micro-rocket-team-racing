@@ -1,5 +1,4 @@
 import "../lib/roundRect";
-import "../lib/walletConnect";
 
 import Canvas from "../lib/canvas";
 import Viewport from "../lib/viewport";
