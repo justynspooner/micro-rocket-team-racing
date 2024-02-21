@@ -18,6 +18,18 @@ import {
 
 import { SignClientTypes } from "@walletconnect/types";
 
+const connectButton = document.getElementById("connect");
+if (!connectButton) {
+  throw new Error("No connect button found!");
+}
+connectButton.onclick = connect;
+
+const disconnectButton = document.getElementById("disconnect");
+if (!disconnectButton) {
+  throw new Error("No disconnect button found!");
+}
+disconnectButton.onclick = disconnect;
+
 var dAppConnector: DAppConnector | undefined;
 
 const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
@@ -112,6 +124,12 @@ async function connect(e: Event) {
   e.preventDefault();
   await dAppConnector!.openModal();
 
+  // Hide the connect button
+  connectButton!.style.display = "none";
+
+  // Show the disconnect button
+  disconnectButton!.style.display = "block";
+
   console.log("Connected to wallet!");
 }
 
@@ -120,9 +138,11 @@ async function disconnect(e: Event) {
   e.preventDefault();
   await dAppConnector!.disconnectAll();
 
+  // Hide the disconnect button
+  disconnectButton!.style.display = "none";
+
+  // Show the connect button
+  connectButton!.style.display = "block";
+
   console.log("Disconnected from wallet!");
 }
-
-document.getElementById("connect")!.onclick = connect;
-document.getElementById("disconnect")!.onclick = disconnect;
-document.getElementById("sign-transaction")!.onclick = hedera_signTransaction;
