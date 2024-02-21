@@ -3,17 +3,17 @@ import {
   HederaChainId,
   HederaJsonRpcMethod,
   HederaSessionEvent,
-  SignTransactionParams,
-  transactionBodyToBase64String,
-  transactionToTransactionBody,
+  SignAndExecuteTransactionParams,
+  transactionToBase64String,
 } from "@hashgraph/hedera-wallet-connect";
 
 import {
-  AccountId,
   Hbar,
+  HbarUnit,
   LedgerId,
+  TopicId,
+  TopicMessageSubmitTransaction,
   TransactionId,
-  TransferTransaction,
 } from "@hashgraph/sdk";
 
 import { SignClientTypes } from "@walletconnect/types";
@@ -26,6 +26,7 @@ const metadataDescription = import.meta.env
   .VITE_WALLET_CONNECT_METADATA_DESCRIPTION;
 const metadataUrl = import.meta.env.VITE_WALLET_CONNECT_METADATA_URL;
 const metadataIconUrl = import.meta.env.VITE_WALLET_CONNECT_METADATA_ICON_URL;
+const replayTopicId = import.meta.env.VITE_HCS_REPLAY_TOPIC_ID;
 
 function saveState(e: SubmitEvent) {
   const formData = new FormData(e.target as HTMLFormElement);
@@ -60,28 +61,50 @@ export async function init() {
   console.log("Initialized dAppConnector!");
 }
 
-export async function hedera_signTransaction(_: Event) {
+export async function hedera_signTransaction(payload: any) {
   if (!dAppConnector) {
     throw new Error("dAppConnector not initialized!");
   }
 
-  const transaction = new TransferTransaction()
-    .setTransactionId(TransactionId.generate("0.0.3571648"))
-    .setMaxTransactionFee(new Hbar(10))
-    .addHbarTransfer("0.0.3571648", new Hbar(-10))
-    .addHbarTransfer("0.0.3571649", new Hbar(10));
+  if (!payload) {
+    throw new Error("Payload is required!");
+  }
 
-  const params: SignTransactionParams = {
-    signerAccountId: "hedera:testnet:0.0.3571648",
-    transactionBody: transactionBodyToBase64String(
-      // must specify a node account id for the transaction body
-      transactionToTransactionBody(transaction, AccountId.fromString("0.0.16"))
-    ),
+  console.log("Creating transaction...");
+  const topicId = TopicId.fromString(replayTopicId);
+
+  const topicMessage = {
+    v: "0.0.1",
+    type: "replay",
+    account: "0.0.3571648",
+    data: payload,
   };
 
-  const { signatureMap } = await dAppConnector.signTransaction(params);
+  let transaction = new TopicMessageSubmitTransaction({
+    topicId,
+    message: JSON.stringify(topicMessage, null, 2),
+  })
+    .setMaxTransactionFee(new Hbar(100, HbarUnit.Hbar))
+    .setTransactionId(TransactionId.generate("0.0.3571648"));
 
-  console.log({ params, signatureMap });
+  console.log("Construct parameters...");
+
+  const params: SignAndExecuteTransactionParams = {
+    signerAccountId: "hedera:testnet:0.0.3571648",
+    transactionList: transactionToBase64String(transaction),
+  };
+
+  console.log("Signing transaction...");
+
+  const data = await dAppConnector.signAndExecuteTransaction(params);
+
+  console.log("Transaction signed!");
+
+  console.log(data);
+
+  // console.log(data.result.signatureMap);
+
+  // console.log({ params, signatureMap });
 }
 
 // connect a new pairing string to a wallet via the WalletConnect modal

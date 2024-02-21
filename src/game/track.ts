@@ -61,7 +61,7 @@ export default class Track {
     //   height: game.canvas.height,
     // });
 
-    // visibleObstacles.forEach((obstacle) => {
+    // this.obstacles.forEach((obstacle) => {
     //   // Draw the rectangle
     //   game.canvas.context.fillRect(
     //     obstacle.x + game.viewport.x,
@@ -72,20 +72,20 @@ export default class Track {
     // });
 
     // Draw the waypoints
-    game.canvas.context.fillStyle = "rgba(0, 255, 0, 0.5)";
-    game.canvas.context.strokeStyle = "rgba(0, 255, 0, 0.5)";
-    game.canvas.context.lineWidth = 2;
-    game.canvas.context.beginPath();
-    this.waypoints.forEach((waypoint) => {
-      game.canvas.context.roundRect(
-        waypoint.x + game.viewport.x,
-        waypoint.y + game.viewport.y,
-        waypoint.width,
-        waypoint.height,
-        10
-      );
-    });
-    game.canvas.context.fill();
+    // game.canvas.context.fillStyle = "rgba(0, 255, 0, 0.5)";
+    // game.canvas.context.strokeStyle = "rgba(0, 255, 0, 0.5)";
+    // game.canvas.context.lineWidth = 2;
+    // game.canvas.context.beginPath();
+    // this.waypoints.forEach((waypoint) => {
+    //   game.canvas.context.roundRect(
+    //     waypoint.x + game.viewport.x,
+    //     waypoint.y + game.viewport.y,
+    //     waypoint.width,
+    //     waypoint.height,
+    //     10
+    //   );
+    // });
+    // game.canvas.context.fill();
 
     game.canvas.context.restore();
   }

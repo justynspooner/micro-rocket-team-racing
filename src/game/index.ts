@@ -1,9 +1,10 @@
 import "../lib/roundRect";
 
 import Canvas from "../lib/canvas";
+import { hedera_signTransaction } from "../lib/hashgraph";
 import Viewport from "../lib/viewport";
 import cars from "./cars";
-import Hud from "./hud";
+import Hud, { RaceState } from "./hud";
 import PlayerCar from "./player-car";
 import Track from "./track";
 import tracks from "./tracks";
@@ -219,6 +220,19 @@ export default class Game {
     if (this.keysDown.resetGame) {
       this.reset();
     }
+
+    // Check for data inscribe
+
+    if (
+      this.keysDown.inscribeData &&
+      this.hud.raceState() === RaceState.FINISHED
+    ) {
+      console.log("Inscribe Data");
+      hedera_signTransaction({
+        lapTimesInMilliseconds: this.hud.lapTimes,
+        raceTimeInMilliseconds: this.hud.finalRaceTime,
+      });
+    }
   }
 
   reset() {
@@ -249,17 +263,20 @@ export default class Game {
 
     // add objects
 
-    this.track = new Track(tracks.sand);
+    this.track = new Track(tracks.rocket);
 
-    this.hud = new Hud(tracks.sand);
+    this.hud = new Hud(tracks.rocket);
 
     this.objects.push(this.track);
+
+    console.log(`Canvas Width: ${this.canvas.width}`);
+    console.log(`Canvas Height: ${this.canvas.height}`);
 
     this.objects.push(
       new PlayerCar(
         Object.assign({}, cars.rocket, {
-          x: this.track.startPositions[0].x,
-          y: this.track.startPositions[0].y,
+          x: -this.track.startPositions[0].x + this.canvas.width / 2,
+          y: -this.track.startPositions[0].y + this.canvas.height / 2,
           angle: this.track.startAngle,
         })
       )

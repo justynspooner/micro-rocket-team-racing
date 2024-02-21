@@ -160,8 +160,11 @@ export default class Car {
   checkCollision(game) {
     const obstacles = game.track.obstacles;
 
-    const carProjectedX = (this.x - game.viewport.width / 2) * -1;
-    const carProjectedY = (this.y - game.viewport.height / 2) * -1;
+    // const carProjectedX = (this.x - game.viewport.width / 2) * -1;
+    // const carProjectedY = (this.y - game.viewport.height / 2) * -1;
+
+    const carProjectedX = -this.x + game.canvas.width / 2;
+    const carProjectedY = -this.y + game.canvas.height / 2;
 
     for (let i = 0; i < obstacles.length; i++) {
       const obstacle = obstacles[i];
