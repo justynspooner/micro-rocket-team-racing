@@ -1,8 +1,8 @@
 import "../lib/roundRect";
 
 import Canvas from "../lib/canvas";
-import { hedera_signTransaction } from "../lib/hashgraph";
 import Viewport from "../lib/viewport";
+import { inscribeRaceData } from "../util/inscriber";
 import cars from "./cars";
 import Hud, { RaceState } from "./hud";
 import PlayerCar from "./player-car";
@@ -129,6 +129,7 @@ export default class Game {
     // inscribe data
 
     if (e.keyCode === this.keys.inscribeData) {
+      console.log("Inscribe Data Key Down");
       this.keysDown.inscribeData = true;
     }
   }
@@ -185,6 +186,7 @@ export default class Game {
     // inscribe data
 
     if (e.keyCode === this.keys.inscribeData) {
+      console.log("Inscribe Data Key Up");
       this.keysDown.inscribeData = false;
     }
   }
@@ -218,6 +220,7 @@ export default class Game {
 
     // Check for game reset
     if (this.keysDown.resetGame) {
+      this.keysDown.resetGame = false;
       this.reset();
     }
 
@@ -227,8 +230,9 @@ export default class Game {
       this.keysDown.inscribeData &&
       this.hud.raceState() === RaceState.FINISHED
     ) {
-      console.log("Inscribe Data");
-      hedera_signTransaction({
+      this.keysDown.inscribeData = false;
+
+      inscribeRaceData({
         lapTimesInMilliseconds: this.hud.lapTimes,
         raceTimeInMilliseconds: this.hud.finalRaceTime,
       });

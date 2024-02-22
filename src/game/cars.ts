@@ -26,7 +26,7 @@ export default {
     imageLocation: "./images/cars/rocket.png",
     height: 14,
     width: 25,
-    maxPower: 10,
+    maxPower: 8,
     acceleration: 1.5,
     braking: 0.25,
     handling: 10,
