@@ -17,6 +17,7 @@ export default class Game {
   canvas: null;
   viewport: null;
   objects: never[];
+  frame: number;
   keys: {
     left: number;
     right: number;
@@ -45,7 +46,7 @@ export default class Game {
     this.tickInterval = 60;
     this.cellWidth = 10;
     this.cellHeight = 10;
-
+    this.frame = 0;
     this.timer = null;
     this.canvas = null;
     this.viewport = null;
@@ -202,6 +203,10 @@ export default class Game {
   }
 
   tick() {
+    // increment frame
+
+    this.frame++;
+
     // clear canvas
 
     this.canvas.clear();

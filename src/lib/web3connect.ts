@@ -26,7 +26,7 @@ export let pairingData: SessionData;
 
 export async function init() {
   //create the hashconnect instance
-  hashconnect = new HashConnect(LedgerId.TESTNET, projectId, appMetadata, true);
+  hashconnect = new HashConnect(LedgerId.MAINNET, projectId, appMetadata, true);
 
   //register events
   setUpHashConnectEvents();
