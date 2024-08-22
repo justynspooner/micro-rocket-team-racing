@@ -1,10 +1,3 @@
-import { LedgerId } from "@hashgraph/sdk";
-import {
-  HashConnect,
-  HashConnectConnectionState,
-  SessionData,
-} from "hashconnect";
-
 const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 const metadataName = import.meta.env.VITE_WALLET_CONNECT_METADATA_NAME;
 const metadataDescription = import.meta.env
@@ -12,93 +5,109 @@ const metadataDescription = import.meta.env
 const metadataUrl = import.meta.env.VITE_WALLET_CONNECT_METADATA_URL;
 const metadataIconUrl = import.meta.env.VITE_WALLET_CONNECT_METADATA_ICON_URL;
 
-const appMetadata = {
+declare global {
+  interface Window {
+    HederaWalletConnectSDK: any;
+  }
+}
+
+const PROJECT_ID = projectId;
+const APP_METADATA = {
   name: metadataName,
   description: metadataDescription,
-  icons: [metadataIconUrl],
   url: metadataUrl,
+  icons: [metadataIconUrl],
 };
 
-export let hashconnect: HashConnect;
-export let state: HashConnectConnectionState =
-  HashConnectConnectionState.Disconnected;
-export let pairingData: SessionData;
+let _isLoggedIn = false;
 
-export async function init() {
-  //create the hashconnect instance
-  hashconnect = new HashConnect(LedgerId.TESTNET, projectId, appMetadata, true);
+let accountInfo = {
+  accountId: "",
+  balance: "",
+};
 
-  //register events
-  setUpHashConnectEvents();
+function updateAccountInfo(accountId?: string, balance?: string) {
+  accountInfo = {
+    accountId: accountId || "",
+    balance: balance || "",
+  };
 
-  //initialize
-  await hashconnect.init();
-}
-
-export async function connect() {
-  //open pairing modal
-  hashconnect.openPairingModal();
-}
-
-export async function disconnect() {
-  hashconnect.disconnect();
-}
-
-function setUpHashConnectEvents() {
-  hashconnect.pairingEvent.on((newPairing: SessionData) => {
-    pairingData = newPairing;
-
-    console.log("Pairing event", pairingData);
-
-    // Update the account id
-    accountIdElement!.innerText = pairingData.accountIds[0];
-
-    // Show the account id
-    accountIdElement!.style.display = "block";
-  });
-
-  hashconnect.disconnectionEvent.on(() => {
-    console.log("Disconnected");
-    pairingData = null;
-
+  if (!accountId) {
+    _isLoggedIn = false;
     accountIdElement!.innerText = "";
-
-    // Hide the account id
     accountIdElement!.style.display = "none";
-  });
+    connectButton!.style.display = "block";
+    disconnectButton!.style.display = "none";
 
-  hashconnect.connectionStatusChangeEvent.on(
-    (connectionStatus: HashConnectConnectionState) => {
-      console.log("Connection status changed", connectionStatus);
-      state = connectionStatus;
+    return;
+  }
+  _isLoggedIn = true;
+  accountIdElement!.innerText = accountId;
+  accountIdElement!.style.display = "block";
+  connectButton!.style.display = "none";
+  disconnectButton!.style.display = "block";
+}
 
-      if (state === HashConnectConnectionState.Paired) {
-        // Hide the connect button
-        connectButton!.style.display = "none";
+export function isLoggedIn() {
+  return _isLoggedIn;
+}
 
-        // Show the disconnect button
-        disconnectButton!.style.display = "block";
-      } else {
-        // Show the connect button
-        connectButton!.style.display = "block";
+export function getAccountInfo() {
+  return accountInfo;
+}
 
-        // Hide the disconnect button
-        disconnectButton!.style.display = "none";
-      }
-    }
-  );
+export async function initWalletConnect() {
+  const sdk = window.HederaWalletConnectSDK;
+  const accountResponse = await sdk.initAccount(PROJECT_ID, APP_METADATA);
+
+  console.log("Account response:", accountResponse);
+
+  if (accountResponse?.accountId) {
+    updateAccountInfo(accountResponse.accountId, accountResponse.balance);
+  }
+}
+
+async function connectToWallet() {
+  try {
+    const sdk = window.HederaWalletConnectSDK;
+    const { balance, accountId } = await sdk.connectWallet(
+      PROJECT_ID,
+      APP_METADATA
+    );
+
+    updateAccountInfo(accountId, balance);
+  } catch (error) {
+    console.error("Failed to connect wallet:", error);
+  }
+}
+
+async function disconnectFromWallet() {
+  try {
+    const sdk = window.HederaWalletConnectSDK;
+    await sdk.disconnectWallet();
+
+    updateAccountInfo();
+  } catch (error) {
+    console.error("Failed to disconnect wallet:", error);
+  }
 }
 
 const connectButton = document.getElementById("connect");
+
 if (!connectButton) {
   throw new Error("No connect button found!");
 }
-connectButton.onclick = connect;
+
+connectButton.onclick = connectToWallet;
 
 const disconnectButton = document.getElementById("disconnect");
+
 if (!disconnectButton) {
   throw new Error("No disconnect button found!");
 }
-disconnectButton.onclick = disconnect;
+
+disconnectButton.onclick = disconnectFromWallet;
 
 const accountIdElement = document.getElementById("accountId");
+
+updateAccountInfo();

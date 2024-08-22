@@ -1,11 +1,19 @@
 export default class Button {
-  constructor(text, fillColor = "#ffffff", textColor = "#000000") {
+  text: string;
+  fillColor: string;
+  textColor: string;
+  x: number = 0;
+  y: number = 0;
+  width: number = 0;
+  height: number = 0;
+
+  constructor(text: string, fillColor = "#ffffff", textColor = "#000000") {
     this.text = text;
     this.fillColor = fillColor;
     this.textColor = textColor;
   }
 
-  draw(c) {
+  draw(c: CanvasRenderingContext2D) {
     c.fillStyle = this.fillColor;
     c.fillRect(this.x, this.y, this.width, this.height);
 
@@ -21,17 +29,17 @@ export default class Button {
     );
   }
 
-  setPosition(x, y) {
+  setPosition(x: number, y: number) {
     this.x = x;
     this.y = y;
   }
 
-  setSize(width, height) {
+  setSize(width: number, height: number) {
     this.width = width;
     this.height = height;
   }
 
-  inBounds(mouseX, mouseY) {
+  inBounds(mouseX: number, mouseY: number) {
     return !(
       mouseX < this.x ||
       mouseX > this.x + this.width ||

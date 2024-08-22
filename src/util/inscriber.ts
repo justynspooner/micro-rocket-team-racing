@@ -1,9 +1,8 @@
-import { TopicMessageSubmitTransaction } from "@hashgraph/sdk";
-import { hashconnect, pairingData } from "../lib/web3connect";
+import { getAccountInfo, isLoggedIn } from "../lib/web3connect";
 
 interface RaceData {
-  lapTimesInMilliseconds: number[];
-  raceTimeInMilliseconds: number;
+  lapsMs: number[];
+  totalMs: number;
 }
 
 const RACE_DATA_TOPIC_ID = import.meta.env.VITE_HCS_RACE_DATA_TOPIC_ID;
@@ -20,13 +19,13 @@ export async function inscribeRaceData(data: RaceData) {
     return;
   }
 
-  const accountId = pairingData?.accountIds[0];
-  if (!accountId) {
-    alert("Please connect your wallet to inscribe your race data");
-    return;
-  }
-
   isInscribing = true;
+
+  console.log("inscribing data", data);
+
+  const { accountId } = getAccountInfo();
+
+  console.log("account id", accountId);
 
   const hcsPayload = {
     v: GAME_VERSION,
@@ -36,17 +35,31 @@ export async function inscribeRaceData(data: RaceData) {
   };
 
   try {
-    const signer = hashconnect.getSigner(accountId);
+    console.log("inscribing", hcsPayload);
 
-    let trans = await new TopicMessageSubmitTransaction({
-      topicId: RACE_DATA_TOPIC_ID,
-      message: JSON.stringify(hcsPayload, null, 2),
-    }).freezeWithSigner(signer);
+    if (!isLoggedIn()) {
+      alert("You need to connect your wallet in order to submit a score.");
+      return;
+    }
 
-    await trans.executeWithSigner(signer);
+    const sdk = window.HederaWalletConnectSDK;
+
+    const result = await sdk.submitMessageToTopic(
+      RACE_DATA_TOPIC_ID,
+      JSON.stringify({
+        t_id: RACE_DATA_TOPIC_ID,
+        op: "register",
+        m: "Submitting score",
+        metadata: hcsPayload,
+        p: "hcs-2",
+      })
+    );
+
+    console.log("Inscribed result: ", result);
   } catch (error) {
     console.error("Error inscribing", error);
   } finally {
+    console.log("Inscription complete");
     isInscribing = false;
   }
 }

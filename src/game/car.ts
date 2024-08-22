@@ -1,5 +1,24 @@
 export default class Car {
-  constructor(opts) {
+  name: string;
+  height: number;
+  width: number;
+  acceleration: number;
+  braking: number;
+  handling: number;
+  maxPower: number;
+  handbrake: number;
+  img: HTMLImageElement;
+  x: number;
+  y: number;
+  prevX: number;
+  prevY: number;
+  angle: number;
+  vx: number;
+  vy: number;
+  power: number;
+  steering: number;
+
+  constructor(opts: any) {
     this.name = opts.name;
 
     this.height = opts.height;
@@ -26,7 +45,7 @@ export default class Car {
     this.steering = 0;
   }
 
-  respondToEvents(game, keysDown = {}) {
+  respondToEvents(game: any, keysDown: any) {
     // steer left?
 
     if (keysDown.left) {
@@ -132,7 +151,7 @@ export default class Car {
     }
   }
 
-  checkWaypoint(game) {
+  checkWaypoint(game: any) {
     const carProjectedX = (this.x - game.viewport.width / 2) * -1;
     const carProjectedY = (this.y - game.viewport.height / 2) * -1;
 
@@ -158,7 +177,7 @@ export default class Car {
     return -1;
   }
 
-  checkCollision(game) {
+  checkCollision(game: any) {
     const obstacles = game.track.obstacles;
 
     // const carProjectedX = (this.x - game.viewport.width / 2) * -1;
@@ -190,7 +209,7 @@ export default class Car {
     }
   }
 
-  calculate(game) {
+  calculate(game: any) {
     // record prev x/y
 
     this.prevX = this.x;
@@ -219,7 +238,7 @@ export default class Car {
     this.steering = this.handling * (Math.abs(this.power) / this.maxPower);
   }
 
-  draw(game, x, y) {
+  draw(game: any, x: number, y: number) {
     // save state
 
     game.canvas.context.save();

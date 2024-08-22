@@ -13,10 +13,10 @@ export default class Game {
   tickInterval: number;
   cellWidth: number;
   cellHeight: number;
-  timer: null;
-  canvas: null;
-  viewport: null;
-  objects: never[];
+  timer: NodeJS.Timeout | undefined;
+  canvas: Canvas | null;
+  viewport: { draw: (obj: Game) => void } | null;
+  objects: { draw: (obj: Game) => void }[];
   frame: number;
   keys: {
     left: number;
@@ -47,7 +47,7 @@ export default class Game {
     this.cellWidth = 10;
     this.cellHeight = 10;
     this.frame = 0;
-    this.timer = null;
+    this.timer = undefined;
     this.canvas = null;
     this.viewport = null;
 
@@ -78,7 +78,7 @@ export default class Game {
     this.friction = 0.82;
   }
 
-  onKeydownListener(e) {
+  onKeydownListener(e: KeyboardEvent) {
     if (
       e.keyCode === this.keys.accelerate ||
       e.keyCode === this.keys.brake ||
@@ -135,7 +135,7 @@ export default class Game {
     }
   }
 
-  onKeyupListener(e) {
+  onKeyupListener(e: KeyboardEvent) {
     if (
       e.keyCode === this.keys.left ||
       e.keyCode === this.keys.right ||
@@ -209,7 +209,7 @@ export default class Game {
 
     // clear canvas
 
-    this.canvas.clear();
+    this.canvas?.clear();
 
     // draw objects
 
@@ -221,7 +221,7 @@ export default class Game {
 
     // draw viewport
 
-    this.viewport.draw(this);
+    this.viewport?.draw(this);
 
     // Check for game reset
     if (this.keysDown.resetGame) {
@@ -238,8 +238,8 @@ export default class Game {
       this.keysDown.inscribeData = false;
 
       inscribeRaceData({
-        lapTimesInMilliseconds: this.hud.lapTimes,
-        raceTimeInMilliseconds: this.hud.finalRaceTime,
+        lapsMs: this.hud.lapTimes,
+        totalMs: this.hud.finalRaceTime,
       });
     }
   }
@@ -268,7 +268,11 @@ export default class Game {
   start() {
     // create canvas object
 
-    this.canvas = new Canvas(document.getElementById("canvas"));
+    const canvasElement = document.getElementById(
+      "canvas"
+    ) as HTMLCanvasElement;
+
+    this.canvas = new Canvas(canvasElement);
 
     // add objects
 
@@ -323,7 +327,7 @@ export default class Game {
     }, this.tickInterval);
   }
 
-  onWaypointTriggered(waypointIndex) {
+  onWaypointTriggered(waypointIndex: number) {
     this.hud.onWaypointTriggered(waypointIndex);
   }
 }

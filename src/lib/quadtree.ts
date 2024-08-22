@@ -1,5 +1,14 @@
 export default class Quadtree {
-  constructor(boundary, capacity) {
+  boundary: any;
+  capacity: number;
+  objects: any[];
+  divided: boolean;
+  northwest: Quadtree | undefined;
+  northeast: Quadtree | undefined;
+  southwest: Quadtree | undefined;
+  southeast: Quadtree | undefined;
+
+  constructor(boundary: any, capacity: number) {
     this.boundary = boundary; // An object with x, y, width, height representing the boundary of this node
     this.capacity = capacity; // Maximum number of objects a node can hold before subdividing
     this.objects = []; // Objects in this node
@@ -11,10 +20,10 @@ export default class Quadtree {
       `${"  ".repeat(level)}${quadrant}: ${this.objects.length} objects`
     );
     if (this.divided) {
-      this.northwest.logNode("NW", level + 1);
-      this.northeast.logNode("NE", level + 1);
-      this.southwest.logNode("SW", level + 1);
-      this.southeast.logNode("SE", level + 1);
+      this.northwest?.logNode("NW", level + 1);
+      this.northeast?.logNode("NE", level + 1);
+      this.southwest?.logNode("SW", level + 1);
+      this.southeast?.logNode("SE", level + 1);
     }
   }
 
@@ -46,7 +55,7 @@ export default class Quadtree {
   }
 
   // Check if an object fits within this quadrant
-  fitsWithin(boundary) {
+  fitsWithin(boundary: any) {
     return (
       boundary.x >= this.boundary.x &&
       boundary.x + boundary.width <= this.boundary.x + this.boundary.width &&
@@ -56,7 +65,7 @@ export default class Quadtree {
   }
 
   // Insert an object into the quadtree
-  insert(object) {
+  insert(object: any) {
     // If the object does not fit within this quad, don't insert it
     if (!this.fitsWithin(object)) {
       console.warn(
@@ -79,10 +88,10 @@ export default class Quadtree {
     }
 
     if (
-      this.northwest.insert(object) ||
-      this.northeast.insert(object) ||
-      this.southwest.insert(object) ||
-      this.southeast.insert(object)
+      this.northwest?.insert(object) ||
+      this.northeast?.insert(object) ||
+      this.southwest?.insert(object) ||
+      this.southeast?.insert(object)
     ) {
       return true;
     }
@@ -92,7 +101,7 @@ export default class Quadtree {
   }
 
   // Query the quadtree for objects that might collide with the given boundary
-  query(range, found = []) {
+  query(range: any, found: any[] = []) {
     // If the range doesn't intersect this quad, return early
     if (!intersect(this.boundary, range)) {
       // console.log("No intersection", this.boundary, range);
@@ -111,16 +120,16 @@ export default class Quadtree {
     // Recursively check children if this node is subdivided
     if (this.divided) {
       // console.log("Checking children", this.boundary, range);
-      this.northwest.query(range, found);
-      this.northeast.query(range, found);
-      this.southwest.query(range, found);
-      this.southeast.query(range, found);
+      this.northwest?.query(range, found);
+      this.northeast?.query(range, found);
+      this.southwest?.query(range, found);
+      this.southeast?.query(range, found);
     }
 
     return found;
   }
 
-  drawNode(game, node) {
+  drawNode(game: any, node: any) {
     game.canvas.context.strokeRect(
       node.boundary.x + game.viewport.x,
       node.boundary.y + game.viewport.y,
@@ -129,14 +138,14 @@ export default class Quadtree {
     );
 
     if (node.divided) {
-      drawNode(node.northwest);
-      drawNode(node.northeast);
-      drawNode(node.southwest);
-      drawNode(node.southeast);
+      this.drawNode(game, node.northwest);
+      this.drawNode(game, node.northeast);
+      this.drawNode(game, node.southwest);
+      this.drawNode(game, node.southeast);
     }
   }
 
-  drawObjects(game, node) {
+  drawObjects(game: any, node: any) {
     for (let obj of node.objects) {
       game.canvas.context.fillRect(
         obj.x + game.viewport.x,
@@ -154,7 +163,7 @@ export default class Quadtree {
     }
   }
 
-  draw(game) {
+  draw(game: any) {
     // save state
     // game.canvas.context.save();
     // // draw all quadtree nodes
@@ -177,7 +186,7 @@ export default class Quadtree {
 */
 
 // Helper function to check if two rectangles intersect
-function intersect(rect1, rect2) {
+function intersect(rect1: any, rect2: any) {
   return !(
     rect2.x > rect1.x + rect1.width ||
     rect2.x + rect2.width < rect1.x ||

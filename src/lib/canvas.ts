@@ -1,5 +1,10 @@
 export default class Canvas {
-  constructor(elem) {
+  elem: HTMLCanvasElement;
+  height: number;
+  width: number;
+  context: CanvasRenderingContext2D | null;
+
+  constructor(elem: HTMLCanvasElement) {
     this.elem = elem;
     this.height = elem.height;
     this.width = elem.width;

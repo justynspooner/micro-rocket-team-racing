@@ -1,8 +1,20 @@
-// const PlayerCar = require("../game/player-car");
 import PlayerCar from "../game/player-car";
 
+interface ViewportOptions {
+  height: number;
+  width: number;
+  margin: number;
+}
+
 export default class Viewport {
-  constructor(opts) {
+  x: number;
+  y: number;
+  height: number;
+  width: number;
+  margin: number;
+  centre: { x: number; y: number };
+
+  constructor(opts: ViewportOptions) {
     this.x = 0;
     this.y = 0;
 
@@ -16,12 +28,8 @@ export default class Viewport {
     };
   }
 
-  draw(game) {
-    // get player car
-
+  draw(game: { objects: any[] }) {
     const playerCar = game.objects.find((obj) => obj instanceof PlayerCar);
-
-    // centre
 
     if (playerCar) {
       this.x = playerCar.x;

@@ -2,7 +2,7 @@
 import Car from "./car";
 
 export default class PlayerCar extends Car {
-  draw(game) {
+  draw(game: any) {
     super.respondToEvents(game, game.keysDown);
     super.calculate(game);
 

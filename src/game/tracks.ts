@@ -1,7 +1,8 @@
 export default {
   rocket: {
+    id: "hcs://6/12345678",
     name: "Rocket Stadium",
-    // imageLocation: "./images/tracks/rocketStadium.png",
+    imageLocation: "src/game/rocketStadium.png",
     height: 4035,
     width: 4110,
     laps: 3,

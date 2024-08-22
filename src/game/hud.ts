@@ -142,7 +142,7 @@ export default class Hud {
     return "0:00.000";
   }
 
-  draw(game) {
+  draw(game: any) {
     game.canvas.context.save();
 
     if (this.raceState() === RaceState.RACING) {
